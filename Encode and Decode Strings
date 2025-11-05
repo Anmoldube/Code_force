@@ -1,0 +1,29 @@
+import java.util.*;
+
+public class Codec {
+    // Encodes a list of strings to a single string.
+    public String encode(List<String> strs) {
+        StringBuilder encoded = new StringBuilder();
+        for (String str : strs) {
+            // Prefix each string with its length (4-digit, padded with spaces)
+            encoded.append(String.format("%4d", str.length()));
+            encoded.append(str);
+        }
+        return encoded.toString();
+    }
+
+    // Decodes a single string to a list of strings.
+    public List<String> decode(String s) {
+        List<String> result = new ArrayList<>();
+        int i = 0;
+        while (i < s.length()) {
+            // Read the 4-digit length prefix
+            int len = Integer.parseInt(s.substring(i, i + 4));
+            i += 4;
+            // Extract the string of the specified length
+            result.add(s.substring(i, i + len));
+            i += len;
+        }
+        return result;
+    }
+}
