@@ -1,0 +1,67 @@
+import java.util.*;
+
+public class Solution {
+    static Scanner sc = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        String mode = sc.nextLine();
+        int t = sc.nextInt();
+
+        if (mode.equals("first")) {
+            // Player A
+            for (int _ = 0; _ < t; _++) {
+                int n = sc.nextInt();
+                int[] p = new int[n];
+                for (int i = 0; i < n; i++) {
+                    p[i] = sc.nextInt();
+                }
+                // Decide x
+                int x = (p[0] == n) ? 0 : 1;
+                System.out.println(x);
+            }
+        } else if (mode.equals("second")) {
+            // Player B
+            for (int _ = 0; _ < t; _++) {
+                int n = sc.nextInt();
+                int x = sc.nextInt();
+                int left = 1, right = n;
+                int ans = -1;
+                while (left <= right && ans == -1) {
+                    int mid = (left + right) / 2;
+                    int l, r;
+                    if (x == 0) {
+                        l = left;
+                        r = mid;
+                    } else {
+                        l = mid;
+                        r = right;
+                    }
+                    System.out.println("? " + l + " " + r);
+                    System.out.flush();
+                    int res = sc.nextInt();
+                    if (res == -1) return;
+                    if (res == n - 1) {
+                        // n is in [l,r]
+                        if (l == r) {
+                            ans = l;
+                        } else {
+                            if (x == 0) {
+                                right = mid;
+                            } else {
+                                left = mid;
+                            }
+                        }
+                    } else {
+                        if (x == 0) {
+                            left = mid + 1;
+                        } else {
+                            right = mid - 1;
+                        }
+                    }
+                }
+                System.out.println("! " + ans);
+                System.out.flush();
+            }
+        }
+    }
+}
