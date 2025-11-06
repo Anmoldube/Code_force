@@ -1,0 +1,73 @@
+import java.util.*;
+
+public class Solution {
+    static final int MOD = 998244353;
+    static int[] fact, invFact;
+
+    // Precompute factorials and modular inverses
+    static void precompute(int maxN) {
+        fact = new int[maxN + 1];
+        invFact = new int[maxN + 1];
+        fact[0] = invFact[0] = 1;
+        for (int i = 1; i <= maxN; i++)
+            fact[i] = (int)((fact[i - 1] * 1L * i) % MOD);
+
+        invFact[maxN] = modInverse(fact[maxN], MOD);
+        for (int i = maxN - 1; i >= 1; i--)
+            invFact[i] = (int)((invFact[i + 1] * 1L * (i + 1)) % MOD);
+    }
+    static int modInverse(int a, int m) {
+        int m0 = m, y = 0, x = 1;
+        while (a > 1) {
+            int q = a / m, t = m;
+            m = a % m;
+            a = t;
+            t = y;
+            y = x - q * y;
+            x = t;
+        }
+        return x < 0 ? x + m0 : x;
+    }
+    static int comb(int n, int k) {
+        if (k < 0 || k > n) return 0;
+        return (int)((fact[n] * 1L * invFact[k] % MOD) * 1L * invFact[n - k] % MOD);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        precompute(5000);
+        int t = sc.nextInt();
+        for (int testCase = 0; testCase < t; testCase++) {
+            int n = sc.nextInt();
+            int[] fa = new int[n];
+            for (int i = 1; i < n; i++)
+                fa[i] = sc.nextInt() - 1;
+            int[] a = new int[n];
+            for (int i = 0; i < n; i++)
+                a[i] = sc.nextInt();
+            // Build tree
+            List<List<Integer>> tree = new ArrayList<>();
+            for (int i = 0; i < n; i++)
+                tree.add(new ArrayList<>());
+            for (int i = 1; i < n; i++)
+                tree.get(fa[i]).add(i);
+
+            // DP to count permutations
+            int[] sz = new int[n];
+            int[] dp = new int[n];
+            dfs(0, tree, sz, dp, a);
+            System.out.println(dp[0]);
+        }
+    }
+
+    static void dfs(int u, List<List<Integer>> tree, int[] sz, int[] dp, int[] a) {
+        sz[u] = 1;
+        dp[u] = 1;
+        for (int v : tree.get(u)) {
+            dfs(v, tree, sz, dp, a);
+            // Combine
+            dp[u] = (int)((dp[u] * 1L * dp[v] % MOD) * comb(sz[u] + sz[v] - 1, sz[v]) % MOD);
+            sz[u] += sz[v];
+        }
+    }
+}
