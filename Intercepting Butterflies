@@ -1,0 +1,101 @@
+import java.util.*;
+
+public class Main {
+    static final int[] P = {1, 2, 4, 8, 16};
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String mode = sc.next();
+        int t = sc.nextInt();
+
+        if (mode.equals("first")) {
+            // Alice's turn
+            while (t-- > 0) {
+                int x = sc.nextInt();
+                List<Integer> S = encode(x);
+                System.out.println(S.size());
+                if (!S.isEmpty()) {
+                    for (int i = 0; i < S.size(); i++) {
+                        System.out.print(S.get(i));
+                        if (i + 1 < S.size()) System.out.print(" ");
+                    }
+                    System.out.println();
+                }
+            }
+        } else {
+            // Bob's turn
+            while (t-- > 0) {
+                int n = sc.nextInt();
+                int mask = 0;
+                for (int i = 0; i < n; i++) {
+                    int bit = sc.nextInt();
+                    mask |= 1 << (bit - 1);
+                }
+                System.out.println(decode(mask));
+            }
+        }
+        sc.close();
+    }
+
+    static List<Integer> encode(int x) {
+        // x in [1, 32768] -> store x-1 (0..32767)
+        int val = x - 1;
+        int[] bits = new int[21]; // 1-indexed
+        int idx = 0;
+
+        // fill 15 data bits
+        for (int i = 1; i <= 20; i++) {
+            if (isP(i)) continue;
+            bits[i] = (val >> idx) & 1;
+            idx++;
+        }
+
+        // compute parity bits
+        for (int p : P) {
+            int parity = 0;
+            for (int i = 1; i <= 20; i++) {
+                if ((i & p) != 0) parity ^= bits[i];
+            }
+            bits[p] = parity;
+        }
+
+        // collect positions of 1s
+        List<Integer> S = new ArrayList<>();
+        for (int i = 1; i <= 20; i++) if (bits[i] == 1) S.add(i);
+        return S;
+    }
+
+    static int decode(int mask) {
+        int[] bits = new int[21];
+        for (int i = 1; i <= 20; i++)
+            if (((mask >> (i - 1)) & 1) == 1)
+                bits[i] = 1;
+
+        int syndrome = 0;
+        for (int p : P) {
+            int parity = 0;
+            for (int i = 1; i <= 20; i++)
+                if ((i & p) != 0)
+                    parity ^= bits[i];
+            if (parity != 0)
+                syndrome |= p;
+        }
+
+        if (syndrome >= 1 && syndrome <= 20)
+            bits[syndrome] ^= 1;
+
+        int val = 0, idx = 0;
+        for (int i = 1; i <= 20; i++) {
+            if (isP(i)) continue;
+            if (bits[i] == 1)
+                val |= 1 << idx;
+            idx++;
+        }
+        return val + 1;
+    }
+
+    static boolean isP(int x) {
+        for (int p : P) if (p == x) return true;
+        return false;
+    }
+}
